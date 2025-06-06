@@ -14,8 +14,7 @@ public class LoginAndRegister {
   // eg: "/" for unix and "\\" for windows
   // toAbsolutePath is required caus we aint hardcoding this folder anywhere on
   // other places as of now
-  private static final String DIR_USER_DATA =
-      Paths.get("").toAbsolutePath().toString() + File.separator + "userData";
+  private static final String DIR_USER_DATA = DIR_CURRENT_PATH + File.separator + "userData";
 
   public static void userDirInitialization() {
     File userData = new File(DIR_USER_DATA);
@@ -31,8 +30,9 @@ public class LoginAndRegister {
   }
 
   public static void makeUserProfile(String userName, String userPassword) {
-    String userFilePath = DIR_USER_DATA + File.separator + userName + ".txt";
-    File userProfile = new File(userFilePath);
+    String userProfileName = userName + ".txt";
+    String userProfilePath = DIR_USER_DATA + File.separator + userProfileName;
+    File userProfile = new File(userProfilePath);
 
     boolean userExists = false;
 
@@ -41,8 +41,9 @@ public class LoginAndRegister {
       if (!userProfile.createNewFile()) {
         System.out.println("User with that name already exists!");
         userExists = true;
+      } else {
+        System.out.println("New user created");
       }
-      System.out.println("New user created");
       // catching io IOException to the variable e
       // gotta use try cauz it will throw IOException if anything goes wrong while
       // creating a new file
@@ -68,11 +69,10 @@ public class LoginAndRegister {
       // we are using buffered writer because there might be other user stats that
       // will be added in future
       // System.lineSeparator adds a newline character
-      try (BufferedWriter bfw = new BufferedWriter(new FileWriter(userFilePath))) {
-        bfw.write("userName=");
-        bfw.write(userName + System.lineSeparator());
-        bfw.write("userPassword=");
-        bfw.write(userPassword + System.lineSeparator());
+      // the true is for append mode
+      try (BufferedWriter bfw = new BufferedWriter(new FileWriter(userProfile, true))) {
+        bfw.write("userName=" + userName + System.lineSeparator());
+        bfw.write("userPassword=" + userPassword + System.lineSeparator());
       } catch (IOException e) {
         e.printStackTrace();
       }
