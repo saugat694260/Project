@@ -67,11 +67,12 @@ public class LoginAndRegister {
       // while filewriter writes every character once at a time
       // we are using buffered writer because there might be other user stats that
       // will be added in future
+      // System.lineSeparator adds a newline character
       try (BufferedWriter bfw = new BufferedWriter(new FileWriter(userFilePath))) {
-        bfw.append(userName);
-        bfw.newLine();
-        bfw.append(userPassword);
-        bfw.newLine();
+        bfw.write("userName=");
+        bfw.write(userName + System.lineSeparator());
+        bfw.write("userPassword=");
+        bfw.write(userPassword + System.lineSeparator());
       } catch (IOException e) {
         e.printStackTrace();
       }
