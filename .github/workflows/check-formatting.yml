@@ -1,0 +1,31 @@
+name: Check Java Formatting
+
+on: [push, pull_request]
+
+jobs:
+  check-formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install google-java-format
+        run: |
+          curl -L -o google-java-format.jar \
+            https://github.com/google/google-java-format/releases/download/v1.20.0/google-java-format-1.20.0-all-deps.jar
+          echo "alias google-java-format='java -jar $(pwd)/google-java-format.jar'" >> $GITHUB_ENV
+
+      - name: Check formatting
+        run: |
+          git ls-files '*.java' | while read -r file; do
+            if ! google-java-format --dry-run "$file"; then
+              echo "❌ $file is not formatted correctly. Run:"
+              echo "   google-java-format -i $file"
+              exit 1
+            fi
+          done
