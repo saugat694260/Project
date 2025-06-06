@@ -1,9 +1,8 @@
 package LoginAndRegister;
 
-import java.util.Scanner;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 
@@ -15,7 +14,8 @@ public class LoginAndRegister {
   // eg: "/" for unix and "\\" for windows
   // toAbsolutePath is required caus we aint hardcoding this folder anywhere on
   // other places as of now
-  private static final String DIR_USER_DATA = Paths.get("").toAbsolutePath().toString() + File.separator + "userData";
+  private static final String DIR_USER_DATA =
+      Paths.get("").toAbsolutePath().toString() + File.separator + "userData";
 
   public static void userDirInitialization() {
     File userData = new File(DIR_USER_DATA);
@@ -77,7 +77,5 @@ public class LoginAndRegister {
         e.printStackTrace();
       }
     }
-
   }
-
 }
