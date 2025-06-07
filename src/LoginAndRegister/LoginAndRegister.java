@@ -19,7 +19,6 @@ public class LoginAndRegister {
   // toAbsolutePath is required caus we aint hardcoding this folder anywhere on
   // other places as of now
   private static final String DIR_ALL_USERS_DIR = DIR_CURRENT_PATH + File.separator + "Users";
-  private static boolean loggedIn = false;
 
   // public static void main(String[] args) {
   // String userName = "lmao";
@@ -42,7 +41,7 @@ public class LoginAndRegister {
     }
   }
 
-  public static boolean makeUserProfile(String userName, String userPassword) {
+  public static void makeUserProfile(String userName, String userPassword) {
     String userDirPath = DIR_ALL_USERS_DIR + File.separator + userName;
     File userDir = new File(userDirPath);
 
@@ -75,6 +74,7 @@ public class LoginAndRegister {
         BufferedWriter bfw = new BufferedWriter(new FileWriter(userProfile));
         // checking if the user already exists
         bfw.write("userName=" + userName + System.lineSeparator());
+        // TODO: password encryption
         bfw.write("userPassword=" + userPassword + System.lineSeparator());
         System.out.println("New user created");
 
@@ -90,11 +90,11 @@ public class LoginAndRegister {
       // prints errors making it easier to debug
       e.printStackTrace();
     }
-    return loggedIn = false;
 
   }
 
   public static boolean logIn(String userName, String userPassword) {
+    boolean loggedIn = false;
     String userProfileName = userName + ".txt";
     File userProfile = new File(DIR_ALL_USERS_DIR + File.separator + userName + File.separator + userProfileName);
 
@@ -104,12 +104,10 @@ public class LoginAndRegister {
     // checking if the user profile exists
     if (!userProfile.exists()) {
       System.out.println("user not found");
-      return loggedIn = false;
     }
 
     if (userInfo.size() < 2) {
       System.out.println("Corrupt or empty user profile.");
-      loggedIn = false;
     }
 
     // pulling out username and password of the existing user
@@ -124,20 +122,21 @@ public class LoginAndRegister {
       e.printStackTrace();
     }
 
+    // checking username and password
+    // TODO: password encryption
     if (userName.matches(userInfo.get(0)) && userPassword.matches(userInfo.get(1))) {
       System.out.println("successfully loaded user profile");
-      loggedIn = true;
     } else {
       System.out.println("invalid password");
     }
-    return loggedIn;
-
   }
 
-  public static boolean rememberLogInInfo() {
-    if (loggedIn) {
-
-    }
-    return loggedIn;
-  }
+  // TODO: gotta make the user autologin somewhere in near future
+  //
+  // public static boolean rememberLogInInfo() {
+  // if (loggedIn) {
+  //
+  // }
+  // return loggedIn;
+  // }
 }
