@@ -8,8 +8,7 @@ public class Main {
   public static void main(String[] args) {
     Scanner scan = new Scanner(System.in);
 
-    LoginAndRegister.userDirInitialization();
-    LoginAndRegister.makeUserProfile("lmao", "lmao");
+    LoginAndRegister loginSystem = new LoginAndRegister(scan);
     // close scanner at the very end of the program
     scan.close();
   }

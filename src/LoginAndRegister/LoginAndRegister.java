@@ -1,142 +1,324 @@
 package LoginAndRegister;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.util.Scanner;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.nio.file.Paths;
+// import java.nio.file.Path;
+
 import java.util.List;
 import java.util.ArrayList;
 
 public class LoginAndRegister {
-  // to avoid hardcoding file paths when other users use this program
+
+  private String userName;
+  private String userPassword;
+
+  // path returns path of folder it is run in. it will be run from Main.java so
+  // file path will be src/
   private static final String DIR_CURRENT_PATH = Paths.get("").toAbsolutePath().toString();
-  // file.seperator adds the file seperator symbol accoiding to the machine that
-  // user is curently on
-  // eg: "/" for unix and "\\" for windows
-  // toAbsolutePath is required caus we aint hardcoding this folder anywhere on
-  // other places as of now
-  private static final String DIR_ALL_USERS_DIR = DIR_CURRENT_PATH + File.separator + "Users";
+
+  private static final File DIR_ALL_USERS_DIR = new File(DIR_CURRENT_PATH + File.separator + "Users");
+
+  private final File LOGGED_IN_USER = new File(DIR_ALL_USERS_DIR + File.separator + "loggedInUser.txt");
+
+  private File USER_DIR() {
+    return new File(DIR_ALL_USERS_DIR + File.separator + userName);
+  }
+
+  private File USER_PROFILE() {
+    return new File(USER_DIR() + File.separator + userName + ".txt");
+  }
 
   // public static void main(String[] args) {
-  // String userName = "lmao";
-  // String userPassword = "lamo2";
-  // userDirInitialization();
-  // makeUserProfile(userName, userPassword);
-  // logIn(userName, userPassword);
+  // neww lol = new neww("lmao", "omal");
+  // }
+  //
+  // public neww(String userName, String userPassword) {
+  // this.userName = userName;
+  // initializeRequiredUserDataDirs();
+  // autoLogin();
+  // createNewUserCredentials();
   // }
 
-  public static void userDirInitialization() {
-    File allUsersDir = new File(DIR_ALL_USERS_DIR);
+  public LoginAndRegister(Scanner scan) {
+    boolean userIsLoggedIn = false;
+    while (!userIsLoggedIn) {
+      clearScreen();
+      initializeRequiredUserDataDirs();
 
-    // .mkdirs makes directories
-    // checking if the file was made, if not it will be created
-    // if it exists nothing will be done
-    if (allUsersDir.mkdir()) {
-      System.out.println("Folder userData was made!");
-    } else {
-      System.out.println("Folder userData already exists!");
+      if (autoLogin()) {
+        loadUserData();
+        userIsLoggedIn = true;
+      }
+
+      threadSleep(2500);
+      clearScreen();
+
+      int userChoice = loginOrSignupScreenTUI(scan);
+
+      System.out.printf("Username: ");
+      this.userName = scan.nextLine();
+      System.out.printf("Password: ");
+      this.userPassword = scan.nextLine();
+      switch (userChoice) {
+        case 1 -> {
+          readUserCredentials();
+          userIsLoggedIn = checkUserCredentials();
+          loadUserData();
+          createAutoLoginUserData();
+        }
+        case 2 -> {
+          createNewUserCredentials();
+          createAutoLoginUserData();
+        }
+
+        case 3 -> {
+          System.out.println("if this text appeared on your screen...\nwell you are one unlucky basterd :p");
+        }
+      }
+
     }
+
   }
 
-  public static void makeUserProfile(String userName, String userPassword) {
-    String userDirPath = DIR_ALL_USERS_DIR + File.separator + userName;
-    File userDir = new File(userDirPath);
-
+  // makes Users dir and loggedInUser txt file
+  private void initializeRequiredUserDataDirs() {
+    if (DIR_ALL_USERS_DIR.exists() && LOGGED_IN_USER.exists()) {
+      System.out.println("User data folders initialized");
+      return;
+    }
     try {
-      userDir.mkdir();
+      DIR_ALL_USERS_DIR.mkdir();
+      LOGGED_IN_USER.createNewFile();
     } catch (Exception e) {
       e.printStackTrace();
-      System.out.println("could not create folder");
+      System.out.println("Initializing required dirs failed");
     }
-
-    String userProfileName = userName + ".txt";
-    File userProfile = new File(DIR_ALL_USERS_DIR + File.separator + userName + File.separator + userProfileName);
-
-    // creates a new buffered BufferedWriter
-    // a simple version of it would be
-    //
-    // FileWriter fw = new FileWriter(userFilePath);
-    // BufferedWriter bfw = new BufferedWriter(fw);
-    //
-    // difference between filewriter and BufferedWriter is that
-    // buffered writer writes a whole string at once
-    // while filewriter writes every character once at a time
-    // we are using buffered writer because there might be other user stats that
-    // will be added in future
-    // System.lineSeparator adds a newline character
-    try {
-      if (!userProfile.createNewFile()) {
-      } else {
-
-        BufferedWriter bfw = new BufferedWriter(new FileWriter(userProfile));
-        // checking if the user already exists
-        bfw.write("userName=" + userName + System.lineSeparator());
-        // TODO: password encryption
-        bfw.write("userPassword=" + userPassword + System.lineSeparator());
-        System.out.println("New user created");
-
-        // catching io IOException to the variable e
-        // gotta use try cauz it will throw IOException if anything goes wrong while
-        // creating a new file
-        // pretty sure code wont run if i dont catch that IOException
-        // but i have not tested it
-        // so we are catching that IOException
-        bfw.close();
-      }
-    } catch (IOException e) {
-      // prints errors making it easier to debug
-      e.printStackTrace();
-    }
-
   }
 
-  public static boolean logIn(String userName, String userPassword) {
-    boolean loggedIn = false;
-    String userProfileName = userName + ".txt";
-    File userProfile = new File(DIR_ALL_USERS_DIR + File.separator + userName + File.separator + userProfileName);
-
-    List<String> userInfo = new ArrayList<>();
-
-    System.out.println(userProfile);
-    // checking if the user profile exists
-    if (!userProfile.exists()) {
-      System.out.println("user not found");
+  // checks if there is previously logged in user
+  // if there is, user will be auto logged in
+  //
+  // currently there is no toggle for autologin (will make it in future)
+  private boolean autoLogin() {
+    boolean logInAuto = false;
+    if ((LOGGED_IN_USER.length() == 0)) {
+      System.out.println("Could not autoLogin. \nNo user data found!! ");
     }
 
-    if (userInfo.size() < 2) {
-      System.out.println("Corrupt or empty user profile.");
+    String line;
+    if (USER_DIR().exists()) {
+      return false;
     }
 
-    // pulling out username and password of the existing user
-    try (BufferedReader bfr = new BufferedReader(new FileReader(userProfile))) {
+    try (BufferedReader bfr = new BufferedReader(new FileReader(LOGGED_IN_USER));) {
+      line = bfr.readLine();
+      // currently USER_DIR().getName() returns null because we have not initialized
+      // userName in the USER_DIR() and it does not update as automatically
+      if (line.matches(USER_DIR().getName())) {
+        // gotta load user data
+        System.out.println("autologin success");
+        logInAuto = true;
+      } else {
+        System.out.println("user profile curropted or deleted");
+      }
+
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.out.println("caused by autologin method");
+    }
+    return logInAuto;
+  }
+
+  private void createAutoLoginUserData() {
+    if (loadUserData()) {
+      try (BufferedWriter bfw = new BufferedWriter(new FileWriter(LOGGED_IN_USER))) {
+        bfw.write(userName);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  // method to create new user
+  private void createNewUserCredentials() {
+    writeUserCredentials();
+  }
+
+  // prolly will have to make it static
+  // make "userName".txt file to store user name and password
+  private void writeUserCredentials() {
+    if (USER_DIR().exists()) {
+      System.out.println("This user already exists!!");
+      return;
+    }
+
+    USER_DIR().mkdir();
+
+    try (
+        BufferedWriter bfw = new BufferedWriter(new FileWriter(USER_PROFILE()))) {
+      bfw.write("Username=" + userName);
+      bfw.newLine();
+      bfw.write("Password=" + userPassword);
+      bfw.newLine();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  // List to save the read user credentials
+  private List<String> userCredentials = new ArrayList<>();
+
+  private void readUserCredentials() {
+
+    if (!USER_PROFILE().exists()) {
+      System.out.println("username not found");
+      return;
+    }
+
+    try (BufferedReader bfr = new BufferedReader(new FileReader(USER_PROFILE()))) {
       String line;
       while ((line = bfr.readLine()) != null) {
         line = line.substring(line.indexOf("=") + 1);
-        userInfo.add(line);
+        userCredentials.add(line);
       }
+    } catch (IOException e) {
 
-    } catch (Exception e) {
       e.printStackTrace();
     }
 
-    // checking username and password
-    // TODO: password encryption
-    if (userName.matches(userInfo.get(0)) && userPassword.matches(userInfo.get(1))) {
-      System.out.println("successfully loaded user profile");
-    } else {
-      System.out.println("invalid password");
-    }
   }
 
-  // TODO: gotta make the user autologin somewhere in near future
-  //
-  // public static boolean rememberLogInInfo() {
-  // if (loggedIn) {
-  //
+  // loads List<String userCredentials and checks the user input of username and
+  // password
+  private boolean checkUserCredentials() {
+    boolean matches = false;
+
+    if (userCredentials.get(0).matches(userName) && userCredentials.get(1).matches(userPassword)) {
+      matches = true;
+      System.out.println("User credentials matched. logging In now....");
+    }
+
+    return matches;
+  }
+
+  // private boolean logIn() {
+  // boolean loggedIn = false;
+  // if (checkUserCredentials()) {
+  // loadUserData();
+  // loggedIn = true;
   // }
   // return loggedIn;
   // }
+
+  private boolean loadUserData() {
+    System.out.println(USER_PROFILE().getAbsolutePath());
+    boolean loggedIn = true;
+    return loggedIn;
+  }
+
+  private int loginOrSignupScreenTUI(Scanner scan) {
+    int userChoice = 0;
+    boolean selected = false;
+
+    while (!selected) {
+      System.out.printf("Enter 1 to login and 2 to sign-up: ");
+      if (scan.hasNextInt()) {
+        userChoice = scan.nextInt();
+        if (userChoice == 1 || userChoice == 2) {
+          selected = true;
+        } else {
+          wrongUserInputMessege();
+          scan.nextLine();
+        }
+      } else {
+        wrongUserInputMessege();
+        scan.nextLine();
+      }
+    }
+
+    scan.nextLine();
+    return userChoice;
+  }
+
+  // utils
+  // these works only on unix terminal
+  // p.s. it will not work in windows powershell
+  private void clearScreen() {
+    System.out.println("\033[H\033[2J");
+    System.out.flush();
+  }
+
+  private void clearScreen(int seconds) {
+    threadSleep(seconds);
+    System.out.println("\033[H\033[2J");
+    System.out.flush();
+  }
+
+  private void threadSleep(int seconds) {
+    try {
+      Thread.sleep(seconds);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void wrongUserInputMessege() {
+    clearScreen();
+    threadSleep(1000);
+    System.out.printf("\"( – ⌓ – )*");
+    threadSleep(2000);
+    clearScreen();
+    threadSleep(1000);
+    System.out.printf("IT'S");
+    threadSleep(800);
+    System.out.printf(" EITHER");
+    threadSleep(800);
+    System.out.printf(" 1");
+    threadSleep(800);
+    System.out.printf(" OR");
+    threadSleep(800);
+    System.out.printf(" 2");
+    threadSleep(800);
+    System.out.printf(" MOTHER");
+    threadSleep(800);
+    System.out.printf(" F***ER!!!");
+    threadSleep(1000);
+    System.out.println("""
+
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⢶⣶⣶⠼⣦⣤⣼⣼⡆⠀⠀⠀⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠖⣯⠿⠟⠛⠻⢶⣿⣯⣿⣿⣃⠀⠀⠀⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣖⣺⡿⠿⠷⠶⠒⢶⣶⠖⠀⠉⡻⢻⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⠀⠀⠀⠀⣴⢻⣭⣫⣿⠁⠀⠀⠀⠀⠀⠀⠀⢀⣾⠃⢀⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⢀⣖⡿⠋⢙⣿⠿⢿⠿⣿⡦⠄⠀⠀⠀⣠⣾⠟⠀⠀⣼⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+        ⠀⠀⢀⣰⣿⣴⣿⡿⠿⠿⠿⢿⣦⣄⠀⠀⠀⣠⣾⣿⠃⠀⢀⣸⡿⣳⣶⣲⡄⠀⠀⠀⠀⠀⠀
+        ⠀⠀⣾⣽⡿⣛⣵⠾⠿⠿⠷⣦⣌⠻⣷⣄⢰⣿⠟⠁⠀⢠⣾⠿⢡⣯⠸⠧⢽⣄⠀⠀⠀⠀⠀
+        ⠀⢸⡇⡟⣴⡿⢟⣽⣾⣿⣶⣌⠻⣧⣹⣿⡿⠋⠀⠀⠀⣾⠿⡇⣽⣿⣄⠀⠀⠉⠳⣄⢀⡀⠀
+        ⠀⢸⠇⢳⣿⢳⣿⣿⣿⣿⣿⣿⡆⢹⡇⣿⡇⠀⡆⣠⣼⡏⢰⣿⣿⣿⣿⣦⠀⠀⠀⠈⠳⣅⠀
+        ⠀⣸⡀⢸⣿⢸⣿⣿⣿⣿⣿⣿⡇⣸⡇⣿⡇⠀⡟⣻⢳⣷⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠘⣧
+        ⢰⡟⡿⡆⠹⣧⡙⢿⣿⣿⠿⡟⢡⣿⢷⣿⣧⠾⢠⣿⣾⣿⣿⣿⣿⣿⣿⠁⠀⠀⠀⠀⠀⠀⠘
+        ⠀⠻⡽⣦⠀⠈⠙⠳⢶⣦⡶⠞⢻⡟⡸⠟⠁⢠⠟⠉⠉⠙⠿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⡴
+        ⠀⠀⢸⣿⡇⠀⠀⣀⣠⠀⢀⡀⠸⣹⠇⠀⣰⡟⡀⠀⠈⠛⠻⢿⣻⣿⡿⠀⠀⠀⠀⠀⠀⡠⠁
+        ⠀⠀⢸⣿⣇⣴⢿⣿⣿⣿⣮⣿⣷⡟⠀⣰⣿⢰⠀⣀⠀⠀⠀⢀⣉⣿⡇⠀⠀⠀⠀⠀⣸⠃⠀
+        ⠀⠀⢸⣿⡟⣯⠸⣿⣿⣿⣿⢈⣿⡇⣼⣿⠇⣸⡦⣙⣷⣦⣴⣯⠿⠛⢷⡀⠀⠀⠀⣰⡟⠀⠀
+        ⠀⠀⠘⣿⣿⡸⣷⣝⠻⠟⢋⣾⣟⣰⡏⣠⣤⡟⠀⠀⠈⠉⠁⠀⠀⠀⠀⢻⣶⠀⢀⣿⠁⠀⠀
+        ⠀⠀⠀⢸⡿⣿⣦⣽⣛⣛⣛⣭⣾⣷⡶⠞⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⡟⠀⠀⠀⠀
+        ⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡀⠁⢸⢻⠁⠀⠀⠀⠀
+        ⠀⠀⠀⠀⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⣤⣤⣀⣀⣀⣀⣀⣠⣤⠶⠛⠁⢀⣾⡟⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⢿⣻⣿⣿⣿⣿⣿⣿⣎⣿⡅⠀⠈⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⣼⣿⠁⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⠈⢻⣿⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡷⠟⠀⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⠻⢿⣿⣿⣟⣂⣀⣀⣀⣀⣀⣀⣤⠴⠋⠁⣾⠀⠀⠀⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⠀⠀⠀⠈⢻⣿⣷⣷⡄⠀⠀⠀⠉⠉⠉⠉⠉⠀⠀⠀⢀⡞⠁⠀⠀⠀⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣷⣤⣤⣤⣤⣄⣤⣤⡤⠴⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+
+                       """);
+    // switch end
+    threadSleep(1000);
+  }
 }
