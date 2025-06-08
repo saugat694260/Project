@@ -1,4 +1,5 @@
 import LoginAndRegister.*;
+import utils.EncryptDecrypt;
 
 import java.util.Scanner;
 
