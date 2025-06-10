@@ -1,251 +1,192 @@
 package LoginAndRegister;
 
-import java.util.Scanner;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.nio.file.Paths;
-// import java.nio.file.Path;
-
+import java.util.Scanner;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.util.List;
 import java.util.ArrayList;
 
 public class LoginAndRegister {
+  // define ALL USER dir
+  private final String DIR_MAIN = Paths.get("").toAbsolutePath().toString() + File.separator + "USERS";
+  private String userName = "guest";
 
-  private String userName;
-  private String userPassword;
-
-  // path returns path of folder it is run in. it will be run from Main.java so
-  // file path will be src/
-  private static final String DIR_CURRENT_PATH = Paths.get("").toAbsolutePath().toString();
-
-  private static final File DIR_ALL_USERS_DIR = new File(DIR_CURRENT_PATH + File.separator + "Users");
-
-  private final File LOGGED_IN_USER = new File(DIR_ALL_USERS_DIR + File.separator + "loggedInUser.txt");
-
-  private File USER_DIR() {
-    return new File(DIR_ALL_USERS_DIR + File.separator + userName);
-  }
-
-  private File USER_PROFILE() {
-    return new File(USER_DIR() + File.separator + userName + ".txt");
-  }
-
-  // public static void main(String[] args) {
-  // neww lol = new neww("lmao", "omal");
-  // }
-  //
-  // public neww(String userName, String userPassword) {
-  // this.userName = userName;
-  // initializeRequiredUserDataDirs();
-  // autoLogin();
-  // createNewUserCredentials();
-  // }
+  private String userPassword = "password";
 
   public LoginAndRegister(Scanner scan) {
-    boolean userIsLoggedIn = false;
-    while (!userIsLoggedIn) {
-      clearScreen();
-      initializeRequiredUserDataDirs();
 
-      if (autoLogin()) {
-        loadUserData();
-        userIsLoggedIn = true;
+    clearScreen();
+    initilizeRequiredFolderAndFile();
+
+    int selection = loginOrSignupSelection(scan);
+    takeUserNameAndPassword(scan);
+
+    boolean created = false;
+    while (!created) {
+      if (selection == 2) {
+        created = createNewUser();
+        takeUserNameAndPassword(scan);
+        clearScreen();
       }
+    }
 
-      threadSleep(2500);
-      clearScreen();
-
-      int userChoice = loginOrSignupScreenTUI(scan);
-
-      System.out.printf("Username: ");
-      this.userName = scan.nextLine();
-      System.out.printf("Password: ");
-      this.userPassword = scan.nextLine();
-      switch (userChoice) {
-        case 1 -> {
-          readUserCredentials();
-          userIsLoggedIn = checkUserCredentials();
-          loadUserData();
-          createAutoLoginUserData();
-        }
-        case 2 -> {
-          createNewUserCredentials();
-          createAutoLoginUserData();
-        }
-
-        case 3 -> {
-          System.out.println("if this text appeared on your screen...\nwell you are one unlucky basterd :p");
-        }
-      }
-
+    boolean doContinue = true;
+    while (doContinue) {
+      doContinue = checkCredentialMatch();
+      doContinue = laodUserDataManually();
     }
 
   }
 
-  // makes Users dir and loggedInUser txt file
-  private void initializeRequiredUserDataDirs() {
-    if (DIR_ALL_USERS_DIR.exists() && LOGGED_IN_USER.exists()) {
-      System.out.println("User data folders initialized");
+  private void initilizeRequiredFolderAndFile() {
+    File USERS = new File(DIR_MAIN);
+    File lastUserName = new File(USERS + File.separator + "lastUserName.txt");
+
+    // returning early if the files exists
+    if (USERS.exists() && lastUserName.exists()) {
       return;
     }
+
+    if (!USERS.mkdir()) {
+      System.out.println("Folder could not be loaded.");
+    }
+    System.out.println("Users dir loaded");
+
     try {
-      DIR_ALL_USERS_DIR.mkdir();
-      LOGGED_IN_USER.createNewFile();
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.out.println("Initializing required dirs failed");
-    }
-  }
-
-  // checks if there is previously logged in user
-  // if there is, user will be auto logged in
-  //
-  // currently there is no toggle for autologin (will make it in future)
-  private boolean autoLogin() {
-    boolean logInAuto = false;
-    if ((LOGGED_IN_USER.length() == 0)) {
-      System.out.println("Could not autoLogin. \nNo user data found!! ");
-    }
-
-    String line;
-    if (USER_DIR().exists()) {
-      return false;
-    }
-
-    try (BufferedReader bfr = new BufferedReader(new FileReader(LOGGED_IN_USER));) {
-      line = bfr.readLine();
-      // currently USER_DIR().getName() returns null because we have not initialized
-      // userName in the USER_DIR() and it does not update as automatically
-      if (line.matches(USER_DIR().getName())) {
-        // gotta load user data
-        System.out.println("autologin success");
-        logInAuto = true;
-      } else {
-        System.out.println("user profile curropted or deleted");
+      if (!lastUserName.createNewFile()) {
+        System.out.println("lastUserName file exists.");
       }
-
+      System.out.println("lastUserName file created");
     } catch (IOException e) {
       e.printStackTrace();
-      System.out.println("caused by autologin method");
+      System.out.println("initilizeRequiredFolderAndFile method: sth went wrong");
     }
-    return logInAuto;
   }
 
-  private void createAutoLoginUserData() {
-    if (loadUserData()) {
-      try (BufferedWriter bfw = new BufferedWriter(new FileWriter(LOGGED_IN_USER))) {
-        bfw.write(userName);
-      } catch (IOException e) {
-        e.printStackTrace();
+  private int loginOrSignupSelection(Scanner scan) {
+
+    while (true) {
+      System.out.print("Enter 1 to Log-In and 2 to Signup: ");
+      String userInput = scan.nextLine().trim();
+
+      try {
+        int choice = Integer.parseInt(userInput);
+        if (choice == 1 || choice == 2) {
+          return choice;
+        } else {
+          wrongUserInputMessege();
+        }
+      } catch (NumberFormatException nfe) {
+        wrongUserInputMessege();
       }
     }
+
   }
 
-  // method to create new user
-  private void createNewUserCredentials() {
-    writeUserCredentials();
-  }
+  private boolean createNewUser() {
+    boolean created = false;
 
-  // prolly will have to make it static
-  // make "userName".txt file to store user name and password
-  private void writeUserCredentials() {
-    if (USER_DIR().exists()) {
-      System.out.println("This user already exists!!");
-      return;
+    File newUser = new File(DIR_MAIN + File.separator + userName);
+    if (!newUser.mkdir()) {
+      System.out.println("That username is taken. Please choose something else!");
+      return created;
     }
 
-    USER_DIR().mkdir();
+    File newUserProfile = new File(newUser + File.separator + userName + ".txt");
+    File newUserData = new File(newUser + File.separator + userName + File.separator + "data.txt");
+
+    try {
+      if (newUserProfile.createNewFile()) {
+        System.out.println("new user" + userName + " was created");
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.out.println("createNewUser");
+    }
 
     try (
-        BufferedWriter bfw = new BufferedWriter(new FileWriter(USER_PROFILE()))) {
+        BufferedWriter bfw = new BufferedWriter(new FileWriter(newUserProfile));) {
       bfw.write("Username=" + userName);
       bfw.newLine();
       bfw.write("Password=" + userPassword);
       bfw.newLine();
+
+      created = true;
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    return created;
   }
 
-  // List to save the read user credentials
-  private List<String> userCredentials = new ArrayList<>();
-
-  private void readUserCredentials() {
-
-    if (!USER_PROFILE().exists()) {
-      System.out.println("username not found");
-      return;
-    }
-
-    try (BufferedReader bfr = new BufferedReader(new FileReader(USER_PROFILE()))) {
-      String line;
-      while ((line = bfr.readLine()) != null) {
-        line = line.substring(line.indexOf("=") + 1);
-        userCredentials.add(line);
-      }
-    } catch (IOException e) {
-
-      e.printStackTrace();
-    }
-
-  }
-
-  // loads List<String userCredentials and checks the user input of username and
-  // password
-  private boolean checkUserCredentials() {
+  private boolean checkCredentialMatch() {
+    File user = new File(DIR_MAIN + File.separator + userName + File.separator + userName + ".txt");
+    String line;
     boolean matches = false;
 
-    if (userCredentials.get(0).matches(userName) && userCredentials.get(1).matches(userPassword)) {
-      matches = true;
-      System.out.println("User credentials matched. logging In now....");
+    if (!user.exists()) {
+      System.out.println("User not found! Please make an account first.");
+      return matches;
     }
 
+    System.out.println("User found! Checking credentials...");
+
+    List<String> userInfo = new ArrayList<>();
+    try (BufferedReader bfr = new BufferedReader(new FileReader(user))) {
+      while ((line = bfr.readLine()) != null) {
+        line = line.substring(line.indexOf("=") + 1);
+        userInfo.add(line);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    if (userInfo.get(0).matches(userName) && userInfo.get(1).matches(userPassword)) {
+      System.out.println("Credentials matches!!!");
+      matches = true;
+    } else {
+      System.out.println("Credentials does not match!");
+    }
     return matches;
   }
 
-  // private boolean logIn() {
-  // boolean loggedIn = false;
-  // if (checkUserCredentials()) {
-  // loadUserData();
-  // loggedIn = true;
-  // }
-  // return loggedIn;
-  // }
+  private boolean laodUserDataManually() {
+    File userData = new File(DIR_MAIN + File.separator + userName + File.separator + "data.txt");
 
-  private boolean loadUserData() {
-    System.out.println(USER_PROFILE().getAbsolutePath());
-    boolean loggedIn = true;
-    return loggedIn;
-  }
-
-  private int loginOrSignupScreenTUI(Scanner scan) {
-    int userChoice = 0;
-    boolean selected = false;
-
-    while (!selected) {
-      System.out.printf("Enter 1 to login and 2 to sign-up: ");
-      if (scan.hasNextInt()) {
-        userChoice = scan.nextInt();
-        if (userChoice == 1 || userChoice == 2) {
-          selected = true;
-        } else {
-          wrongUserInputMessege();
-          scan.nextLine();
-        }
-      } else {
-        wrongUserInputMessege();
-        scan.nextLine();
-      }
+    if (!userData.exists()) {
+      System.out.println("No user data found!! It might have been curropted or deleted!");
+      return false;
     }
 
-    scan.nextLine();
-    return userChoice;
+    // will add user data after creating game
+    // current plan is the user data will have achivements and stats saved
+    System.out.println("user data loaded!!");
+    System.out.println("logged in successfully");
+    return true;
   }
 
+  // logOut option
+  private void logOut() {
+
+  }
+
+  // log in or signup screen
+  private void takeUserNameAndPassword(Scanner scan) {
+    System.out.print("Username: ");
+    this.userName = scan.nextLine();
+    System.out.print("Password: ");
+    this.userPassword = scan.nextLine();
+  }
+
+  // method to make new user dir
+  // method to log in
+  //
+  //
   // utils
   // these works only on unix terminal
   // p.s. it will not work in windows powershell
@@ -321,4 +262,5 @@ public class LoginAndRegister {
     // switch end
     threadSleep(1000);
   }
+
 }
