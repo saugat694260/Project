@@ -1,4 +1,2 @@
 bin/
-src/make.sh
-src/note
-src/userData/*
+USERS/
