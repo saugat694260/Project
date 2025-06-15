@@ -1,0 +1,53 @@
+// build.gradle
+plugins {
+    id 'java'  // Enables Java compilation
+    id 'application'
+}
+
+
+application {
+    mainClass = 'Main'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'Main'
+    }
+    from {
+        configurations.runtimeClasspath.collect { 
+            it.isDirectory() ? it : zipTree(it) 
+        }
+    }
+    duplicatesStrategy = 'exclude'     // Avoid duplicate files
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(20) // or 11, depending on what you have
+    }
+}
+
+// Source directory setup (if non-standard)
+
+
+
+
+
+// Dependencies (add libraries like JUnit here)
+repositories {
+    mavenCentral()  // Downloads dependencies from Maven
+}
+
+dependencies {
+    // Example: Add JUnit Jupiter for testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
+    implementation 'org.mindrot:jbcrypt:0.4'
+}
+
+// Test configuration (optional)
+test {
+    useJUnitPlatform()
+}
+
+
+

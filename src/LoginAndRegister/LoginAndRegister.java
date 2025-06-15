@@ -24,28 +24,32 @@ public class LoginAndRegister {
     initilizeRequiredFolderAndFile();
 
     int selection = loginOrSignupSelection(scan);
-    takeUserNameAndPassword(scan);
 
-    boolean created = false;
-    while (!created) {
-      if (selection == 2) {
-        created = createNewUser();
-        takeUserNameAndPassword(scan);
-        clearScreen();
+    clearScreen();
+    if (selection == 2) {
+      System.out.println("Sign-Up");
+      takeUserNameAndPassword(scan);
+      if (createNewUser()) {
+        System.out.println("User created successfully!");
+        saveUserLogin();
+      } else {
+        System.out.println("Use was not  created");
+        return;
       }
+      clearScreen();
     }
 
-    boolean doContinue = true;
-    while (doContinue) {
-      doContinue = checkCredentialMatch();
-      doContinue = laodUserDataManually();
+    System.out.println("Log-In");
+    takeUserNameAndPassword(scan);
+    if (checkCredentialMatch()) {
+      saveUserLogin();
+      loadUserDataManually();
     }
-
   }
 
   private void initilizeRequiredFolderAndFile() {
     File USERS = new File(DIR_MAIN);
-    File lastUserName = new File(USERS + File.separator + "lastUserName.txt");
+    File lastUserName = new File(DIR_MAIN + File.separator + "lastUserName.txt");
 
     // returning early if the files exists
     if (USERS.exists() && lastUserName.exists()) {
@@ -71,7 +75,7 @@ public class LoginAndRegister {
   private int loginOrSignupSelection(Scanner scan) {
 
     while (true) {
-      System.out.print("Enter 1 to Log-In and 2 to Signup: ");
+      System.out.print("Enter 1 to Log-In and 2 to Sign-Up: ");
       String userInput = scan.nextLine().trim();
 
       try {
@@ -98,11 +102,13 @@ public class LoginAndRegister {
     }
 
     File newUserProfile = new File(newUser + File.separator + userName + ".txt");
-    File newUserData = new File(newUser + File.separator + userName + File.separator + "data.txt");
+    File newUserData = new File(newUser + File.separator + userName + "data.txt");
 
     try {
-      if (newUserProfile.createNewFile()) {
-        System.out.println("new user" + userName + " was created");
+      if (newUserProfile.createNewFile() && newUserData.createNewFile()) {
+        System.out.println("new user " + userName + " was created");
+      } else {
+        System.out.println("User could not be created");
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -155,8 +161,8 @@ public class LoginAndRegister {
     return matches;
   }
 
-  private boolean laodUserDataManually() {
-    File userData = new File(DIR_MAIN + File.separator + userName + File.separator + "data.txt");
+  private boolean loadUserDataManually() {
+    File userData = new File(DIR_MAIN + File.separator + userName + File.separator + userName + "data.txt");
 
     if (!userData.exists()) {
       System.out.println("No user data found!! It might have been curropted or deleted!");
@@ -177,10 +183,32 @@ public class LoginAndRegister {
 
   // log in or signup screen
   private void takeUserNameAndPassword(Scanner scan) {
-    System.out.print("Username: ");
-    this.userName = scan.nextLine();
+    boolean b = false;
+    while (!b) {
+      System.out.print("Username: ");
+      this.userName = scan.nextLine();
+
+      if (userName.length() > 10) {
+        System.out.println("Username should not exceed 10 characters!");
+      } else if (userName.matches(".*[^a-zA-Z0-9].*")) {
+        System.out.println("Please exclude special characters");
+      } else {
+        b = true;
+      }
+    }
+
     System.out.print("Password: ");
     this.userPassword = scan.nextLine();
+  }
+
+  private void saveUserLogin() {
+    File lastUserName = new File(DIR_MAIN + File.separator + "lastUserName.txt");
+
+    try (FileWriter fw = new FileWriter(lastUserName);) {
+      fw.write(userName);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   // method to make new user dir
