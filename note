@@ -1,3 +1,0 @@
-.jar file is inside build/libs/
-to run .jar file execute the command
-java -jar <filename>.jar
