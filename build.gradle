@@ -10,7 +10,13 @@ application {
     mainClass = 'Main'
 }
 
-
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
 
 
 jar {
