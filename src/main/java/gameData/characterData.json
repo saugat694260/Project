@@ -1,0 +1,61 @@
+{
+  "gameCharacters": [
+    {
+      "id": 1,
+      "name": "Arthas",
+      "class": "Paladin",
+      "level": 35,
+      "abilities": ["Holy Light", "Divine Shield", "Hammer of Justice"],
+      "stats": {
+        "health": 1200,
+        "mana": 850,
+        "strength": 90,
+        "agility": 50,
+        "intelligence": 70
+      },
+      "equipment": {
+        "weapon": "Lightbringer",
+        "armor": "Blessed Plate Armor",
+        "accessory": "Ring of Faith"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Selene",
+      "class": "Mage",
+      "level": 28,
+      "abilities": ["Fireball", "Frost Nova", "Teleport"],
+      "stats": {
+        "health": 700,
+        "mana": 1300,
+        "strength": 30,
+        "agility": 60,
+        "intelligence": 120
+      },
+      "equipment": {
+        "weapon": "Staff of the Arcane",
+        "armor": "Robe of the Phoenix",
+        "accessory": "Amulet of Wisdom"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Thorne",
+      "class": "Rogue",
+      "level": 30,
+      "abilities": ["Backstab", "Stealth", "Poison Blade"],
+      "stats": {
+        "health": 950,
+        "mana": 400,
+        "strength": 75,
+        "agility": 110,
+        "intelligence": 45
+      },
+      "equipment": {
+        "weapon": "Twin Daggers",
+        "armor": "Shadow Leather Armor",
+        "accessory": "Cloak of Evasion"
+      }
+    }
+  ]
+}

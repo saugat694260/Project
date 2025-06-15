@@ -1,11 +1,9 @@
-
-
-import java.util.Scanner;
+import utils.readJson;
 
 public class Main {
-
-  public static void main(String[] args) {
-	  System.out.println("h3lll");
-    
-  }
+    public static void main(String[] args) {
+        readJson read=new readJson();
+        read.readAndPrintCharacters();
+    }
 }
+

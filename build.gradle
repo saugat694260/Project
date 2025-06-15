@@ -2,12 +2,16 @@
 plugins {
     id 'java'  // Enables Java compilation
     id 'application'
+     id 'eclipse' 
 }
 
 
 application {
     mainClass = 'Main'
 }
+
+
+
 
 jar {
     manifest {
@@ -41,7 +45,7 @@ repositories {
 dependencies {
     // Example: Add JUnit Jupiter for testing
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
-    implementation 'org.mindrot:jbcrypt:0.4'
+    implementation 'com.google.code.gson:gson:2.10.1' 
 }
 
 // Test configuration (optional)
