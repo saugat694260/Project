@@ -33,7 +33,7 @@ jar {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(20) // or 11, depending on what you have
+        languageVersion = JavaLanguageVersion.of(21) // or 11, depending on what you have
     }
 }
 
