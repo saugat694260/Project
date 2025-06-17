@@ -1,0 +1,34 @@
+{
+  "id": 1,
+  "name": "gigi",
+  "characterClass": "assisan",
+  "level": "3",
+  "abilities": [
+    "fireball",
+    "teleport",
+    "arcane shield"
+  ],
+  "stats": {
+    "health": "10000",
+    "mana": 200,
+    "strength": 5,
+    "agility": 20,
+    "speed": 15
+  },
+  "equipment": {
+    "weapon": "magic staff",
+    "armor": "Mystic Robes",
+    "accessory": [
+      "amulet of wisdom",
+      "mana crystal"
+    ]
+  },
+  "images": {
+    "profile": "url:/mira-profile",
+    "body": "url:/mira-body"
+  },
+  "audios": {
+    "voice": "mira.mp3",
+    "sharpAttack": "zap.mp3"
+  }
+}

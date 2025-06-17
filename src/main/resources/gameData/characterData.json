@@ -1,60 +1,57 @@
 {
   "gameCharacters": [
     {
-      "id": 1,
-      "name": "Arthas",
-      "class": "Paladin",
-      "level": 35,
-      "abilities": ["Holy Light", "Divine Shield", "Hammer of Justice"],
+      "id": 0,
+      "name": "slick",
+      "characterClass": "thief",
+      "level": 0,
+      "abilities": ["sneak", "stealth", "quick stab"],
       "stats": {
-        "health": 1200,
-        "mana": 850,
-        "strength": 90,
+        "health": 100,
+        "mana": 100,
+        "strength": 10,
         "agility": 50,
-        "intelligence": 70
+        "speed": 10
       },
       "equipment": {
-        "weapon": "Lightbringer",
+        "weapon": "knife",
         "armor": "Blessed Plate Armor",
-        "accessory": "Ring of Faith"
+        "accessory": ["ring", "knife of chaos"]
+      },
+      "images": {
+        "profile": "url:/gogo",
+        "body": "url:hoho"
+      },
+      "audios": {
+        "voice": "gogo.mp3",
+        "sharpAttack": "hehe.mp3"
       }
     },
     {
-      "id": 2,
-      "name": "Selene",
-      "class": "Mage",
-      "level": 28,
-      "abilities": ["Fireball", "Frost Nova", "Teleport"],
+      "id": 1,
+      "name": "mira",
+      "characterClass": "magician",
+      "level": 0,
+      "abilities": ["fireball", "teleport", "arcane shield"],
       "stats": {
-        "health": 700,
-        "mana": 1300,
-        "strength": 30,
-        "agility": 60,
-        "intelligence": 120
+        "health": 80,
+        "mana": 200,
+        "strength": 5,
+        "agility": 20,
+        "speed": 15
       },
       "equipment": {
-        "weapon": "Staff of the Arcane",
-        "armor": "Robe of the Phoenix",
-        "accessory": "Amulet of Wisdom"
-      }
-    },
-    {
-      "id": 3,
-      "name": "Thorne",
-      "class": "Rogue",
-      "level": 30,
-      "abilities": ["Backstab", "Stealth", "Poison Blade"],
-      "stats": {
-        "health": 950,
-        "mana": 400,
-        "strength": 75,
-        "agility": 110,
-        "intelligence": 45
+        "weapon": "magic staff",
+        "armor": "Mystic Robes",
+        "accessory": ["amulet of wisdom", "mana crystal"]
       },
-      "equipment": {
-        "weapon": "Twin Daggers",
-        "armor": "Shadow Leather Armor",
-        "accessory": "Cloak of Evasion"
+      "images": {
+        "profile": "url:/mira-profile",
+        "body": "url:/mira-body"
+      },
+      "audios": {
+        "voice": "mira.mp3",
+        "sharpAttack": "zap.mp3"
       }
     }
   ]

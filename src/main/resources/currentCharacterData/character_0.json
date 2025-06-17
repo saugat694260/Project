@@ -1,0 +1,34 @@
+{
+  "id": 0,
+  "name": "slick",
+  "characterClass": "thief",
+  "level": 0,
+  "abilities": [
+    "sneak",
+    "stealth",
+    "quick stab"
+  ],
+  "stats": {
+    "health": 100,
+    "mana": 100,
+    "strength": 10,
+    "agility": 50,
+    "speed": 10
+  },
+  "equipment": {
+    "weapon": "knife",
+    "armor": "Blessed Plate Armor",
+    "accessory": [
+      "ring",
+      "knife of chaos"
+    ]
+  },
+  "images": {
+    "profile": "url:/gogo",
+    "body": "url:hoho"
+  },
+  "audios": {
+    "voice": "gogo.mp3",
+    "sharpAttack": "hehe.mp3"
+  }
+}
