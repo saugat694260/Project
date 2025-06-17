@@ -11,7 +11,7 @@ public class CharacterDataWriter {
 
 	public static void writeCharacterToJsonFile(int id) {
 	    try {
-	    	String fileLocation = "src/main/resources/currentCharacterData/character_1.json";
+	    	String fileLocation = "src/main/resources/gameData/characterData.json";
 	        if (fileLocation == null) {
 	            System.out.println("Resource file not found: gameData/characterData.json");
 	            return;
