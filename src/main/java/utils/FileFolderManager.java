@@ -12,6 +12,7 @@ public class FileFolderManager {
 
   private static final String DIR_RESOURCES = DIR_MAIN + File.separator + "resources";
   private static final String DIR_GAME_DATA = DIR_RESOURCES + File.separator + "gameData";
+  private static final String DIR_CURRENT_CHARACTER_DATA = DIR_GAME_DATA + File.separator + "currentCharacterData";
 
   private static final String CHARACTER_DATA = DIR_GAME_DATA + File.separator + "characterData.json";
 
@@ -21,7 +22,7 @@ public class FileFolderManager {
     boolean initialized = false;
 
     initialized = getDirMain().mkdir() && getDirUsers().mkdir() && getDirResources().mkdir()
-        && getDirGameData().mkdir();
+        && getDirGameData().mkdir() && ;
     initialized = createCharacterData();
     if (!initialized) {
       System.out.println("Unable to initialize files and folders");
@@ -50,6 +51,11 @@ public class FileFolderManager {
 
   public static File getDirGameData() {
     File file = new File(DIR_GAME_DATA);
+    return file;
+  }
+
+  public static File getDirCurrentCharacterData() {
+    File file = new File(DIR_CURRENT_CHARACTER_DATA);
     return file;
   }
 
