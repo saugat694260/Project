@@ -1,8 +1,7 @@
-package LoginAndRegister;
+package utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Scanner;
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -13,9 +12,9 @@ import java.util.ArrayList;
 
 public class LoginAndRegister {
   // define ALL USER dir
-  private final String DIR_MAIN = Paths.get("").toAbsolutePath().toString() + File.separator + "USERS";
-  private String userName = "guest";
+  File users = FileFolderManager.getDirUsers();
 
+  private String userName = "guest";
   private String userPassword = "password";
 
   public LoginAndRegister(Scanner scan) {
@@ -26,6 +25,10 @@ public class LoginAndRegister {
     int selection = loginOrSignupSelection(scan);
 
     clearScreen();
+    if (selection == 0) {
+      System.out.println("enjoy your next 24 hours :)\n");
+      System.exit(0);
+    }
     if (selection == 2) {
       System.out.println("Sign-Up");
       takeUserNameAndPassword(scan);
@@ -48,24 +51,10 @@ public class LoginAndRegister {
   }
 
   private void initilizeRequiredFolderAndFile() {
-    File USERS = new File(DIR_MAIN);
-    File lastUserName = new File(DIR_MAIN + File.separator + "lastUserName.txt");
-
-    // returning early if the files exists
-    if (USERS.exists() && lastUserName.exists()) {
-      return;
-    }
-
-    if (!USERS.mkdir()) {
-      System.out.println("Folder could not be loaded.");
-    }
-    System.out.println("Users dir loaded");
+    File lastUserName = new File(users + File.separator + "lastUserName.txt");
 
     try {
-      if (!lastUserName.createNewFile()) {
-        System.out.println("lastUserName file exists.");
-      }
-      System.out.println("lastUserName file created");
+      lastUserName.createNewFile();
     } catch (IOException e) {
       e.printStackTrace();
       System.out.println("initilizeRequiredFolderAndFile method: sth went wrong");
@@ -75,12 +64,13 @@ public class LoginAndRegister {
   private int loginOrSignupSelection(Scanner scan) {
 
     while (true) {
+      System.out.println("(0 to exit)");
       System.out.print("Enter 1 to Log-In and 2 to Sign-Up: ");
       String userInput = scan.nextLine().trim();
 
       try {
         int choice = Integer.parseInt(userInput);
-        if (choice == 1 || choice == 2) {
+        if (choice == 1 || choice == 2 || choice == 0) {
           return choice;
         } else {
           wrongUserInputMessege();
@@ -95,7 +85,7 @@ public class LoginAndRegister {
   private boolean createNewUser() {
     boolean created = false;
 
-    File newUser = new File(DIR_MAIN + File.separator + userName);
+    File newUser = new File(users + File.separator + userName);
     if (!newUser.mkdir()) {
       System.out.println("That username is taken. Please choose something else!");
       return created;
@@ -131,7 +121,7 @@ public class LoginAndRegister {
   }
 
   private boolean checkCredentialMatch() {
-    File user = new File(DIR_MAIN + File.separator + userName + File.separator + userName + ".txt");
+    File user = new File(users + File.separator + userName + File.separator + userName + ".txt");
     String line;
     boolean matches = false;
 
@@ -162,7 +152,7 @@ public class LoginAndRegister {
   }
 
   private boolean loadUserDataManually() {
-    File userData = new File(DIR_MAIN + File.separator + userName + File.separator + userName + "data.txt");
+    File userData = new File(users + File.separator + userName + File.separator + userName + "data.txt");
 
     if (!userData.exists()) {
       System.out.println("No user data found!! It might have been curropted or deleted!");
@@ -177,9 +167,9 @@ public class LoginAndRegister {
   }
 
   // logOut option
-  private void logOut() {
-
-  }
+  // private void logOut() {
+  //
+  // }
 
   // log in or signup screen
   private void takeUserNameAndPassword(Scanner scan) {
@@ -202,7 +192,7 @@ public class LoginAndRegister {
   }
 
   private void saveUserLogin() {
-    File lastUserName = new File(DIR_MAIN + File.separator + "lastUserName.txt");
+    File lastUserName = new File(users + File.separator + "lastUserName.txt");
 
     try (FileWriter fw = new FileWriter(lastUserName);) {
       fw.write(userName);

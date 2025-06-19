@@ -3,11 +3,7 @@ bin/
 build/
 USERS/
 gradle/
-gradlew
-gradlew.bat
 note
 .classpath
 .project
-
-
-
+rpgGamename/
