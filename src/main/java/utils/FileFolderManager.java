@@ -22,7 +22,7 @@ public class FileFolderManager {
     boolean initialized = false;
 
     initialized = getDirMain().mkdir() && getDirUsers().mkdir() && getDirResources().mkdir()
-        && getDirGameData().mkdir() && ;
+        && getDirGameData().mkdir() && getDirCurrentCharacterData().mkdir();
     initialized = createCharacterData();
     if (!initialized) {
       System.out.println("Unable to initialize files and folders");
